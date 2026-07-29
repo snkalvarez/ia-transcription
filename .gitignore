@@ -149,8 +149,10 @@ activemq-data/
 
 # Environments
 .env
+.env.*
+!.env.example
 .envrc
-.venv
+.venv/
 env/
 venv/
 ENV/
@@ -203,6 +205,12 @@ cython_debug/
 # Temporary file for partial code execution
 tempCodeRunnerFile.py
 
+# IDEs and OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
 # Ruff stuff:
 .ruff_cache/
 
@@ -216,3 +224,4 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+

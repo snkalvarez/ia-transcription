@@ -1,0 +1,2 @@
+if False:
+    import python_multipart  # Engaña a pipreqs para que lo incluya

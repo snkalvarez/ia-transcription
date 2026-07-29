@@ -1,0 +1,5 @@
+fastapi==0.140.13
+faster_whisper==1.2.1
+pydantic-settings==2.10.1
+python-multipart==0.0.32
+uvicorn[standard]
