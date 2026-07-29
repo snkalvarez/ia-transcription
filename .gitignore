@@ -1,0 +1,40 @@
+# Python: bytecode y cachés
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Entornos virtuales y variables locales
+.venv/
+venv/
+env/
+ENV/
+.env
+.env.*
+!.env.example
+
+# Empaquetado y distribución
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Pruebas, cobertura y herramientas de análisis
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+
+# IDEs y sistema operativo
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Archivos locales de ejecución
+*.log
