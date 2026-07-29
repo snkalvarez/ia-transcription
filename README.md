@@ -74,10 +74,10 @@ Desde la raíz del repositorio:
 uvicorn app.main:app --reload
 ```
 
-El servicio estará disponible en `http://127.0.0.1:8000`.
+El servicio estará disponible en `http://127.0.0.1:8080`.
 
-- Documentación Swagger: `http://127.0.0.1:8000/docs`
-- Documentación ReDoc: `http://127.0.0.1:8000/redoc`
+- Documentación Swagger: `http://127.0.0.1:8080/docs`
+- Documentación ReDoc: `http://127.0.0.1:8080/redoc`
 
 ## Endpoints
 
@@ -112,7 +112,7 @@ Parámetros:
 Ejemplo con `curl`:
 
 ```bash
-curl -X POST "http://127.0.0.1:8000/transcribe" \
+curl -X POST "http://127.0.0.1:8080/transcribe" \
   -H "accept: application/json" \
   -H "Content-Type: multipart/form-data" \
   -F "file=@audio.webm"
@@ -122,7 +122,7 @@ Ejemplo con PowerShell:
 
 ```powershell
 Invoke-RestMethod `
-  -Uri "http://127.0.0.1:8000/transcribe" `
+  -Uri "http://127.0.0.1:8080/transcribe" `
   -Method Post `
   -Form @{ file = Get-Item ".\audio.webm" }
 ```
