@@ -34,12 +34,12 @@ ALLOWED_TYPES = {
     "audio/ogg"
 }
 
-@app.get("/")
+@app.get("/health")
 def health():
-
     return {
-        "status": "ok",
-        "service": "IA Transcription Service"
+        "status": "UP",
+        "service": settings.APP_NAME,
+        "version": settings.APP_VERSION
     }
 
 @app.post("/transcribe")
