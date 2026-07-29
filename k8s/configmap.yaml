@@ -14,6 +14,8 @@ data:
 
   ENVIRONMENT: "dev"
 
+  CORS_ORIGINS: "http://192.168.8.1:5173, http://dev.soluciones.local, http://localhost:5173"
+
   WHISPER_MODEL: "small"
   WHISPER_DEVICE: "cpu"
   WHISPER_COMPUTE_TYPE: "int8"

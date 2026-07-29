@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: ia-transcription
-          image: desarrollohusjp/ia-transcription:dev-e18df37
+          image: desarrollohusjp/ia-transcription:dev-8bd1e39
           imagePullPolicy: Always
 
           ports:

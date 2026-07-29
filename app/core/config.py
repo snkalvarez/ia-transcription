@@ -19,6 +19,12 @@ class Settings(BaseSettings):
     DEFAULT_LANGUAGE: str = "es"
     LOG_LEVEL: str = "INFO"
 
+    CORS_ORIGINS: str = "http://localhost:5173"
+
+    @property
+    def cors_origins(self):
+        return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
+
     class Config:
         env_file = ".env"
 
