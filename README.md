@@ -51,6 +51,9 @@ los valores predeterminados mostrados:
 
 | Variable | Predeterminado | Descripción |
 | --- | --- | --- |
+| `OLLAMA_HOST` | `http://localhost:11434` | URL base del servidor Ollama. |
+| `OLLAMA_MODEL` | `qwen3:8b` | Modelo usado para extraer el resultado clinico. |
+| `OLLAMA_TIMEOUT` | `300` | Tiempo maximo de espera de Ollama, en segundos. |
 | `WHISPER_MODEL` | `small` | Modelo de Faster-Whisper que se cargará. |
 | `DEVICE` | `cpu` | Dispositivo de ejecución, por ejemplo `cpu` o `cuda`. |
 | `COMPUTE_TYPE` | `int8` | Precisión de cálculo, por ejemplo `int8`, `float16` o `float32`. |
@@ -135,6 +138,34 @@ Respuesta exitosa:
   "text": "Texto transcrito del archivo de audio."
 }
 ```
+
+### Transcribir y generar resultado clinico
+
+```http
+POST /transcribeandresultado
+Content-Type: multipart/form-data
+```
+
+Recibe el mismo campo `file` que `/transcribe`. Despues de transcribirlo, el
+servicio envia el texto a `POST {OLLAMA_HOST}/api/generate` con `stream: false`,
+el modelo configurado y el esquema clinico.
+
+```bash
+curl -X POST "http://127.0.0.1:8080/transcribeandresultado" \
+  -H "accept: application/json" \
+  -F "file=@audio.webm"
+```
+
+La respuesta tiene esta forma:
+
+```json
+{
+  "transcription": { "language": "es", "text": "Texto transcrito" },
+  "resultado": { "subjetivo": "...", "diagnosticos": [] }
+}
+```
+
+Si Ollama no esta disponible o devuelve contenido no valido, responde `502`.
 
 ## Estructura del proyecto
 

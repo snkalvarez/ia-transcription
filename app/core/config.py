@@ -21,6 +21,11 @@ class Settings(BaseSettings):
 
     CORS_ORIGINS: str = "http://localhost:5173"
 
+    # Ollama
+    OLLAMA_HOST: str = "http://localhost:11434"
+    OLLAMA_MODEL: str = "qwen3:8b"
+    OLLAMA_TIMEOUT: int = 300
+
     @property
     def cors_origins(self):
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]

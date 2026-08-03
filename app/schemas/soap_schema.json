@@ -1,0 +1,162 @@
+{
+  "model": "qwen3:8b",
+  "stream": false,
+  "format": {
+    "type": "object",
+    "properties": {
+      "subjetivo": {
+        "type": ["string", "null"],
+        "description": "Lo que refiere el paciente."
+      },
+      "objetivo": {
+        "type": ["string", "null"],
+        "description": "Hallazgos del examen físico."
+      },
+      "analisis": {
+        "type": ["string", "null"],
+        "description": "Interpretación clínica del médico."
+      },
+      "plan": {
+        "type": ["string", "null"],
+        "description": "Conducta o plan de manejo."
+      },
+      "escalaDolor": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": ["string", "null"],
+            "enum": [
+              "ADULTOS",
+              "PEDIATRICO",
+              "FLACC",
+              "CRIES",
+              null
+            ]
+          },
+          "valor": {
+            "type": ["integer", "null"]
+          }
+        },
+        "required": [
+          "tipo",
+          "valor"
+        ]
+      },
+      "educacionPaciente": {
+        "type": "object",
+        "properties": {
+          "realizada": {
+            "type": ["string", "null"],
+            "enum": [
+              "SI",
+              "NO",
+              null
+            ]
+          },
+          "explicacion": {
+            "type": ["string", "null"]
+          }
+        },
+        "required": [
+          "realizada",
+          "explicacion"
+        ]
+      },
+      "infeccionHospitalaria": {
+        "type": ["string", "null"],
+        "enum": [
+          "SI",
+          "NO",
+          null
+        ]
+      },
+      "diagnosticos": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "nombre": {
+              "type": ["string", "null"]
+            },
+            "principal": {
+              "type": ["boolean", "null"]
+            },
+            "tipo": {
+              "type": ["string", "null"]
+            },
+            "clase": {
+              "type": ["string", "null"]
+            },
+            "clasificacion": {
+              "type": ["string", "null"]
+            },
+            "observacion": {
+              "type": ["string", "null"]
+            }
+          },
+          "required": [
+            "nombre",
+            "principal",
+            "tipo",
+            "clase",
+            "clasificacion",
+            "observacion"
+          ]
+        }
+      },
+      "indicacionMedica": {
+        "type": "object",
+        "properties": {
+          "tipo": {
+            "type": ["string", "null"],
+            "enum": [
+              "Hospitalizacion",
+              "UrgenciasObservacion",
+              "Cirugia",
+              "Remision",
+              "Morgue",
+              "Salida",
+              "SalidaConsultaExterna",
+              null
+            ]
+          },
+          "detalle": {
+            "type": ["string", "null"]
+          },
+          "causaExterna": {
+            "type": ["string", "null"]
+          },
+          "finalidadConsulta": {
+            "type": ["string", "null"]
+          },
+          "condicionDestino": {
+            "type": ["string", "null"]
+          },
+          "finalizarAtencion": {
+            "type": ["boolean", "null"]
+          }
+        },
+        "required": [
+          "tipo",
+          "detalle",
+          "causaExterna",
+          "finalidadConsulta",
+          "condicionDestino",
+          "finalizarAtencion"
+        ]
+      }
+    },
+    "required": [
+      "subjetivo",
+      "objetivo",
+      "analisis",
+      "plan",
+      "escalaDolor",
+      "educacionPaciente",
+      "infeccionHospitalaria",
+      "diagnosticos",
+      "indicacionMedica"
+    ]
+  },
+  "prompt": "Eres un extractor de información clínica.\n\nExtrae únicamente la información que aparezca explícitamente en el texto.\n\nReglas:\n- No inventes información.\n- No deduzcas valores.\n- No cambies el significado del texto.\n- Si un dato no aparece explícitamente devuelve null.\n- Para los campos con valores restringidos usa únicamente los permitidos por el esquema.\n- Si no existen diagnósticos devuelve un arreglo vacío.\n- Devuelve exclusivamente un JSON válido que cumpla exactamente el esquema.\n\nTexto:\n\nPaciente refiere disminución del dolor abdominal desde el día anterior. Al examen físico se encuentra alerta, orientado, afebril, con abdomen blando y depresible, sin signos de irritación peritoneal. Se considera evolución clínica favorable. Se decide dar salida con analgésicos y control por medicina interna en ocho días. Dolor 2 de 10. No presenta infección intrahospitalaria. Se realizó educación al paciente y su familia sobre signos de alarma. Diagnóstico: Colelitiasis. Observación del diagnóstico: paciente estable al egreso."
+}
