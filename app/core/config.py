@@ -19,16 +19,26 @@ class Settings(BaseSettings):
     DEFAULT_LANGUAGE: str = "es"
     LOG_LEVEL: str = "INFO"
 
-    CORS_ORIGINS: str = "http://localhost:5173"
+    CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://dgh", "http://hefesto"]
 
     # Ollama
     OLLAMA_HOST: str = "http://localhost:11434"
     OLLAMA_MODEL: str = "qwen3:8b"
     OLLAMA_TIMEOUT: int = 300
 
+    # Groq
+    GROQ_API_KEY: str = ""
+    # GROQ_MODEL: str = "llama-3.3-70b-versatile"
+    GROQ_MODEL: str = "openai/gpt-oss-20b"
+    GROQ_TIMEOUT: int = 300
+
+    #configuracion de la base de datos
+    DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/ia_transcription_service"
+    
+
     @property
     def cors_origins(self):
-        return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
+        return [origin.strip() for origin in self.CORS_ORIGINS if origin.strip()]
 
     class Config:
         env_file = ".env"

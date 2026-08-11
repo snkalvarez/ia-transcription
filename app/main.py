@@ -2,15 +2,23 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from app.services.transcription_service import TranscriptionService
 from app.services.ollama_service import OllamaService, OllamaServiceError
+from app.services.groq_service import extract_note
 from app.core.config import settings
 from app.core.logger import logger
+from app.schemas.chat_request import ChatRequest
+from groq import AsyncGroq
+import logging
+import json
+from pathlib import Path
 
-import tempfile
-import shutil
-import os
+client = AsyncGroq(api_key=settings.GROQ_API_KEY, timeout=settings.GROQ_TIMEOUT)
+
+logger = logging.getLogger(__name__)
+
 import asyncio
 
 app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION)
+BASE_DIR = Path(__file__).resolve().parent
 
 app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins, allow_credentials=True, allow_methods=["*"], allow_headers=["*"], )
 
@@ -31,76 +39,78 @@ def health():
 async def transcribe(
     file: UploadFile = File(...)
 ):
-    if file.content_type not in ALLOWED_TYPES:
-        raise HTTPException(
-            status_code=415,
-            detail="Formato de audio no soportado."
-        )    
     logger.info("Iniciando proceso de transcripción para el archivo %s", file.filename)
-    print("Archivo recibido:", file.filename, file.content_type)
-    MAX_SIZE = settings.MAX_AUDIO_SIZE_MB * 1024 * 1024
-    contents = await file.read()
     logger.info("Archivo recibido %s", file.filename)
-
-    if len(contents) > MAX_SIZE:
-        raise HTTPException(
-            status_code=413,
-            detail=f"El archivo supera el tamaño máximo permitido de {settings.MAX_AUDIO_SIZE_MB} MB."
-        )
-    await file.seek(0)
-    temp_path = None
-
-    try:
-        extension = file.filename.split(".")[-1]
-        temp_file = tempfile.NamedTemporaryFile(
-            delete=False,
-            suffix=f".{extension}"
-        )
-
-        temp_path = temp_file.name
-        temp_file.close()
-        with open(temp_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-        result = transcription_service.transcribe(temp_path)
-        return result
-
-    finally:
-
-        if temp_path and os.path.exists(temp_path):
-            os.remove(temp_path)
+    result = await transcription_service.transcribe_upload(file, ALLOWED_TYPES)
+    return result
 
 @app.post("/transcribeandresultado")
 async def transcribeandresultado(file: UploadFile = File(...)):
     """Transcribe un audio y genera el resultado clínico estructurado con Ollama."""
-    if file.content_type not in ALLOWED_TYPES:
-        raise HTTPException(status_code=415, detail="Formato de audio no soportado.")
-
-    max_size = settings.MAX_AUDIO_SIZE_MB * 1024 * 1024
-    contents = await file.read()
-    if len(contents) > max_size:
+    transcription = await transcription_service.transcribe_upload(file, ALLOWED_TYPES)
+    try:
+        resultado = await asyncio.to_thread(ollama_service.extract, transcription["text"])
+    except OllamaServiceError as exc:
+        logger.exception("Error al solicitar la extracción clínica a Ollama")
         raise HTTPException(
-            status_code=413,
-            detail=f"El archivo supera el tamaño máximo permitido de {settings.MAX_AUDIO_SIZE_MB} MB."
+            status_code=502,
+            detail="Ollama no está disponible o devolvió una respuesta inválida.",
+        ) from exc
+
+    return {"transcription": transcription, "resultado": resultado}
+
+
+@app.post("/transcribeandresultadogroq")
+async def transcribeandresultadogroq(file: UploadFile = File(...)):
+    """Transcribe un audio y genera el resultado clínico estructurado con Groq."""
+    transcription = await transcription_service.transcribe_upload(file, ALLOWED_TYPES)
+    try:
+        resultado = await extract_note(transcription["text"])
+    except Exception as exc:
+        logger.exception("Error al solicitar la extracción clínica a Groq")
+        raise HTTPException(
+            status_code=502,
+            detail="Groq no está disponible o devolvió una respuesta inválida.",
+        ) from exc
+
+    return {"transcription": transcription, "resultado": resultado}
+
+
+@app.post("/groq-chat")
+async def groq_chat(request: ChatRequest):
+    try:
+        # Realizamos la petición de transcripción/generación de texto a Groq
+        chat_completion = await client.chat.completions.create(
+            messages=[
+                {
+                    "role": "user",
+                    "content": request.text,
+                }
+            ],
+            model=settings.GROQ_MODEL,
+            temperature=0.7,         # Controla la creatividad (0.0 más lógico, 1.0 más creativo)
+            max_tokens=1024,         # Límite de tokens en la respuesta
         )
 
-    temp_path = None
-    try:
-        extension = os.path.splitext(file.filename or "audio")[1]
-        with tempfile.NamedTemporaryFile(delete=False, suffix=extension) as temp_file:
-            temp_file.write(contents)
-            temp_path = temp_file.name
+        # Extraemos el texto de la respuesta devuelta por Groq
+        response_text = chat_completion.choices[0].message.content
 
-        transcription = await asyncio.to_thread(transcription_service.transcribe, temp_path)
-        try:
-            resultado = await asyncio.to_thread(ollama_service.extract, transcription["text"])
-        except OllamaServiceError as exc:
-            logger.exception("Error al solicitar la extracción clínica a Ollama")
-            raise HTTPException(
-                status_code=502,
-                detail="Ollama no está disponible o devolvió una respuesta inválida.",
-            ) from exc
+        return {
+            "status": "success",
+            "response": response_text
+        }
 
-        return {"transcription": transcription, "resultado": resultado}
-    finally:
-        if temp_path and os.path.exists(temp_path):
-            os.remove(temp_path)
+    except Exception as e:
+        logger.exception("Error durante la petición a Groq Chat Completions")
+        raise HTTPException(
+            status_code=502,
+            detail="Error al procesar la solicitud con el servicio de Groq.",
+        ) from e
+
+
+@app.get("/json-schema")
+def get_json_schema():
+    """Devuelve el esquema JSON de la clase ChatRequest."""
+    schema_path = BASE_DIR / "schemas" / "response_ok.json"
+    return json.loads(schema_path.read_text(encoding="utf-8"))
+

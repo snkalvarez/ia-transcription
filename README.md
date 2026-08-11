@@ -167,6 +167,18 @@ La respuesta tiene esta forma:
 
 Si Ollama no esta disponible o devuelve contenido no valido, responde `502`.
 
+### Transcribir y generar resultado clínico con Groq
+
+```http
+POST /transcribeandresultadogroq
+Content-Type: multipart/form-data
+```
+
+Recibe el mismo campo `file` que `/transcribe`. Devuelve la transcripción y el
+resultado clínico estructurado producido por Groq. Configure `GROQ_API_KEY` en
+`.env`; se usan por defecto `llama-3.3-70b-versatile` y 300 segundos de espera.
+Los errores de Groq o una respuesta no JSON devuelven `502`.
+
 ## Estructura del proyecto
 
 ```text

@@ -1,0 +1,40 @@
+{
+  "transcription": {
+    "language": "es",
+    "text": "Aciente femenino de 42 años que consulta por dolor abdominal localizado en el cuadrante superior derecho desde hace dos días. Refiere que el dolor inició después de consumir alimentos grasos y actualmente lo califica en 7 sobre 10. Niega fiebre, vómito y diarrea. Al examen físico se encuentra alerta, orientada en tiempo, lugar y persona, con signos vitales estables. Se observa dolor a la palpación en hipocondrio derecho, sin signos de irritación peritoneal. El resto del examen físico no presenta alteraciones relevantes. Se considera un cuadro compatible con colesistitis aguda no complicada. Se decide hospitalización para manejo con analgésicos, líquidos intravenosos, valoración por cirugía general y realización de ecografía de vías biliares. Se explicó a la paciente y a su familiar el diagnóstico, el plan de manejo y los signos de alarma, verificando su comprensión. No presenta infección intraspitalaria."
+  },
+  "resultado": {
+    "subjetivo": "Aciente femenino de 42 años que consulta por dolor abdominal localizado en el cuadrante superior derecho desde hace dos días. Refiere que el dolor inició después de consumir alimentos grasos y actualmente lo califica en 7 sobre 10. Niega fiebre, vómito y diarrea.",
+    "objetivo": "Al examen físico se encuentra alerta, orientada en tiempo, lugar y persona, con signos vitales estables. Se observa dolor a la palpación en hipocondrio derecho, sin signos de irritación peritoneal. El resto del examen físico no presenta alteraciones relevantes.",
+    "analisis": "Se considera un cuadro compatible con colesistitis aguda no complicada.",
+    "plan": "Se decide hospitalización para manejo con analgésicos, líquidos intravenosos, valoración por cirugía general y realización de ecografía de vías biliares.",
+    "infeccionIntrahospitalaria": "SI",
+    "escalaDolor": {
+      "tipo": "PEDIATRICA",
+      "valor": "NO DUELE"
+    },
+    "educacionPaciente": {
+      "realizada": "SI",
+      "explicacion": "Se explicó a la paciente y a su familiar el diagnóstico, el plan de manejo y los signos de alarma, verificando su comprensión."
+    },
+    "diagnosticos": [
+      {
+        "codigo": "",
+        "nombre": "Colesistitis aguda no complicada",
+        "principal": true,
+        "tipo": "PRESUNTIVO",
+        "clase": "IMPRESION_DIAGNOSTICA",
+        "clasificacion": "PREOPERATORIO",
+        "observacion": ""
+      }
+    ],
+    "indicacionMedica": {
+      "tipo": "HOSPITALIZACION",
+      "causaExterna": "NINGUNA",
+      "finalidadConsulta": "Manejo clínico",
+      "condicionDestino": "PACIENTE_CONTINUA_EN_EL_SERVICIO",
+      "detalle": "Hospitalización para manejo con analgésicos, líquidos intravenosos, valoración por cirugía general y ecografía de vías biliares.",
+      "finalizarAtencion": false
+    }
+  }
+}
