@@ -32,12 +32,12 @@ class Settings(BaseSettings):
     GROQ_MODEL: str = "openai/gpt-oss-20b"
     GROQ_TIMEOUT: int = 300
 
-    #configuracion de la base de datos
+    # Configuración de la base de datos.
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/ia_transcription_service"
     
 
     @property
-    def cors_origins(self):
+    def cors_origins(self) -> list[str]:
         return [origin.strip() for origin in self.CORS_ORIGINS if origin.strip()]
 
     class Config:

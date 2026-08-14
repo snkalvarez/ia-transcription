@@ -1,7 +1,9 @@
 import logging
 
+from app.core.config import settings
+
 logging.basicConfig(
-    level=logging.INFO,
+    level=settings.LOG_LEVEL,
     format="%(asctime)s %(levelname)s %(message)s"
 )
 

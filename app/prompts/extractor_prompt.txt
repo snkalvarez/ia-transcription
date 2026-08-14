@@ -14,6 +14,19 @@ No cambias palabras.
 
 No inventas diagnósticos, planes ni observaciones.
 
+<<<<<<< ours
 Si un dato no aparece en el texto debes dejarlo vacío.
 
 Devuelve únicamente un JSON válido que cumpla exactamente el JSON Schema.
+=======
+Si un dato no aparece en el texto, usa el valor vacío compatible con el tipo
+definido por el JSON Schema:
+
+- Para textos y enums, usa "".
+- Para arreglos, usa [].
+- Para escalaDolor.valor, usa null.
+- Para los booleanos diagnosticos[].principal e indicacionMedica.finalizarAtencion,
+  usa false.
+
+Devuelve únicamente un JSON válido que cumpla exactamente el JSON Schema.
+>>>>>>> theirs

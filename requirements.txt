@@ -5,3 +5,5 @@ python-multipart==0.0.32
 requests>=2.31,<3
 uvicorn[standard]
 groq==1.6.0
+asyncpg
+sqlalchemy
