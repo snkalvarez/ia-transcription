@@ -14,19 +14,70 @@ No cambias palabras.
 
 No inventas diagnósticos, planes ni observaciones.
 
-<<<<<<< ours
 Si un dato no aparece en el texto debes dejarlo vacío.
 
 Devuelve únicamente un JSON válido que cumpla exactamente el JSON Schema.
-=======
+
 Si un dato no aparece en el texto, usa el valor vacío compatible con el tipo
 definido por el JSON Schema:
 
 - Para textos y enums, usa "".
 - Para arreglos, usa [].
 - Para escalaDolor.valor, usa null.
-- Para los booleanos diagnosticos[].principal e indicacionMedica.finalizarAtencion,
+- Para los booleanos diagnosticos[].principal e indicacionesMedicas.finalizarAtencion,
   usa false.
 
+Si la transcripción no indica explícitamente que un diagnóstico es principal,
+diagnosticos[].principal = false.
+
+No asumas que el primer, único o más importante diagnóstico mencionado
+es necesariamente el diagnóstico principal.
+
 Devuelve únicamente un JSON válido que cumpla exactamente el JSON Schema.
->>>>>>> theirs
+
+
+NOTA INTERMEDIA
+
+Debes clasificar la información exclusivamente según su contenido clínico:
+
+SUBJETIVO:
+Información referida por el paciente, síntomas, molestias,
+antecedentes narrados, evolución subjetiva y lo que el paciente manifiesta.
+
+OBJETIVO:
+Hallazgos observables o medibles por el personal de salud:
+signos vitales, examen físico, resultados de pruebas, estudios,
+hallazgos clínicos observados y mediciones.
+
+ANÁLISIS:
+Interpretación clínica del profesional, impresión diagnóstica,
+valoración médica, evolución clínica o conclusión derivada
+de los hallazgos.
+
+PLAN:
+Conductas, tratamientos, procedimientos, medicamentos,
+órdenes, estudios solicitados, remisiones, hospitalización,
+seguimiento y demás acciones que se realizarán.
+
+IMPORTANTE:
+Una misma frase NO debe copiarse simultáneamente en varias secciones
+si pertenece claramente a una sola sección.
+
+REGLA DE EVIDENCIA
+
+No infieras valores que no estén explícitamente respaldados
+por la transcripción.
+
+Si la transcripción dice que se realizará una hospitalización,
+NO significa automáticamente que exista una orden.
+
+Si la transcripción no menciona una orden:
+existeOrden = ""
+
+Si la transcripción no menciona traslado:
+trasladarPaciente.realizar = ""
+
+No conviertas la ausencia de una acción en "NO".
+
+"NO" solamente debe utilizarse cuando la transcripción
+indique explícitamente que la respuesta es negativa.

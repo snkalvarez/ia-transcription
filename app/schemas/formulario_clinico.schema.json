@@ -1,0 +1,23 @@
+{
+  "name": "formulario_clinico",
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "historiaClinica": {
+        "$ref": "historia_clinica.schema.json"
+      },
+      "indicacionesMedicas": {
+        "$ref": "indicaciones_medicas.schema.json"
+      },
+      "diagnosticos": {
+        "$ref": "diagnosticos.schema.json"
+      }
+    },
+    "required": [
+      "historiaClinica",
+      "indicacionesMedicas",
+      "diagnosticos"
+    ]
+  }
+}

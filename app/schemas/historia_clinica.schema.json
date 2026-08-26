@@ -1,0 +1,102 @@
+{
+  "name": "historia_clinica",
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "notaIntermedia": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "subjetivo": {
+            "type": "string",
+            "description": "Información referida por el paciente o acompañante, incluyendo síntomas, molestias, evolución de los síntomas, antecedentes y manifestaciones subjetivas. No incluir hallazgos obtenidos directamente mediante examen físico, mediciones, interpretaciones médicas ni acciones del plan."
+          },
+          "objetivo": {
+            "type": "string",
+            "description": "Hallazgos objetivos observados o medidos durante la valoración clínica, incluyendo signos vitales, examen físico, resultados de pruebas, estudios y mediciones. No incluir síntomas o información referida por el paciente, interpretaciones diagnósticas ni decisiones o conductas del plan."
+          },
+          "analisis": {
+            "type": "string",
+            "description": "Interpretación y valoración clínica realizada por el profesional de salud, incluyendo impresión diagnóstica, evolución clínica o conclusión derivada de los hallazgos. No incluir hallazgos objetivos ni acciones futuras del plan."
+          },
+          "plan": {
+            "type": "string",
+            "description": "Conductas y acciones clínicas decididas o indicadas por el profesional, incluyendo tratamientos, medicamentos, procedimientos, estudios solicitados, hospitalización, remisiones, seguimiento y otras acciones futuras. No incluir la interpretación diagnóstica como contenido principal."
+          },
+          "infeccionIntrahospitalaria": {
+            "type": "string",
+            "enum": [
+              "",
+              "SI",
+              "NO"
+            ],
+            "description": "Indica si existe infección intrahospitalaria."
+          },
+          "escalaDolor": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "tipo": {
+                "type": "string",
+                "enum": [
+                  "",
+                  "ADULTOS",
+                  "PEDIATRICA",
+                  "NEONATAL"
+                ],
+                "description": "Tipo de escala de dolor utilizada."
+              },
+              "valor": {
+                "type": [
+                  "integer",
+                  "string",
+                  "null"
+                ],
+                "description": "Valor registrado para la escala de dolor."
+              }
+            },
+            "required": [
+              "tipo",
+              "valor"
+            ]
+          }
+        },
+        "required": [
+          "subjetivo",
+          "objetivo",
+          "analisis",
+          "plan",
+          "infeccionIntrahospitalaria",
+          "escalaDolor"
+        ]
+      },
+      "educacionAutocuidado": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "realizada": {
+            "type": "string",
+            "enum": [
+              "SI",
+              "NO"
+            ],
+            "description": "Indica si fue realizada educación en autocuidado por el médico tratante."
+          },
+          "explicacion": {
+            "type": "string",
+            "description": "Descripción de la educación en autocuidado brindada al paciente."
+          }
+        },
+        "required": [
+          "realizada",
+          "explicacion"
+        ]
+      }
+    },
+    "required": [
+      "notaIntermedia",
+      "educacionAutocuidado"
+    ]
+  }
+}

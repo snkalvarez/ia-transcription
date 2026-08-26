@@ -1,0 +1,177 @@
+{
+  "name": "indicaciones_medicas",
+  "schema": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "tipo": {
+        "type": "string",
+        "enum": [
+          "",
+          "HOSPITALIZACION",
+          "URGENCIAS_OBSERVACION",
+          "CIRUGIA",
+          "REMISION",
+          "MORGUE",
+          "SALIDA",
+          "SALIDA_CONSULTA_EXTERNA"
+        ],
+        "description": "Tipo de indicación médica. Debe seleccionarse únicamente cuando esté respaldado por la transcripción."
+      },
+
+      "causaExterna": {
+        "type": "string",
+        "enum": [
+          "",
+          "NINGUNA",
+          "ACCIDENTE_TRABAJO",
+          "ACCIDENTE_HOGAR",
+          "ACCIDENTE_TRANSITO_ORIGEN_COMUN",
+          "ACCIDENTE_TRANSITO_ORIGEN_LABORAL",
+          "ACCIDENTE_ENTORNO_EDUCATIVO",
+          "OTRO_TIPO_ACCIDENTE",
+          "EVENTO_CATASTROFICO_ORIGEN_NATURAL",
+          "LESION_AGRESION",
+          "LESION_AUTOINFLIGIDA",
+          "SOSPECHA_VIOLENCIA_FISICA",
+          "SOSPECHA_VIOLENCIA_PSICOLOGICA",
+          "SOSPECHA_VIOLENCIA_SEXUAL",
+          "SOSPECHA_NEGLIGENCIA_ABANDONO",
+          "IVE_PELIGRO_SALUD_VIDA_MUJER",
+          "IVE_MALFORMACION_CONGENITA_INCOMPATIBLE_VIDA",
+          "IVE_VIOLENCIA_SEXUAL_INCESTO_INSEMINACION_TRANSFERENCIA_NO_CONSENTIDA",
+          "EVENTO_ADVERSO_SALUD",
+          "ENFERMEDAD_GENERAL",
+          "ENFERMEDAD_LABORAL",
+          "ATENCION_POBLACION_MATERNO_PERINATAL",
+          "RIESGO_AMBIENTAL",
+          "OTROS_EVENTOS_CATASTROFICOS",
+          "ACCIDENTE_MINA_ANTIPERSONAL_MAP",
+          "ACCIDENTE_ARTEFACTO_EXPLOSIVO_IMPROVISADO_AEI",
+          "ACCIDENTE_MUNICION_SIN_EXPLOTAR_MUSE",
+          "OTRA_VICTIMA_CONFLICTO_ARMADO_COLOMBIANO",
+          "IVE_DECISION_VOLUNTAD_PERSONA_GESTANTE_HASTA_SEMANA_24"
+        ],
+        "description": "Causa externa asociada a la indicación médica. Usar '' cuando la transcripción no mencione ninguna causa externa. Usar 'NINGUNA' únicamente cuando la transcripción indique explícitamente que no existe causa externa, que la causa externa es ninguna o equivalente. No usar 'NINGUNA' simplemente porque no se haya mencionado una causa externa. Si se menciona una causa externa, seleccionar únicamente la opción del enum que corresponda."
+      },
+
+      "finalidadConsulta": {
+        "type": "string",
+        "enum": [
+          "",
+          "NINGUNA",
+          "VALORACION_INTEGRAL_PROMOCION_MANTENIMIENTO",
+          "DETECCION_TEMPRANA_ENFERMEDAD_GENERAL",
+          "DETECCION_TEMPRANA_ENFERMEDAD_LABORAL",
+          "DIAGNOSTICO",
+          "TRATAMIENTO",
+          "REHABILITACION",
+          "PALIACION",
+          "PLANIFICACION_FAMILIAR_ANTICONCEPCION",
+          "PROMOCION_APOYO_LACTANCIA_MATERNA",
+          "ATENCION_BASICA_ORIENTACION_FAMILIAR",
+          "ATENCION_CUIDADO_PRECONCEPCIONAL",
+          "ATENCION_CUIDADO_PRENATAL",
+          "INTERRUPCION_VOLUNTARIA_EMBARAZO",
+          "ATENCION_PARTO_PUERPERIO",
+          "SEGUIMIENTO_RECIEN_NACIDO",
+          "MODIFICACION_ESTETICA_CORPORAL"
+        ],
+        "description": "Finalidad de la consulta asociada a la indicación médica."
+      },
+
+      "existeOrden": {
+        "type": "string",
+        "enum": [
+          "",
+          "SI",
+          "NO"
+        ],
+        "description": "Estado de una orden médica de hospitalización. Este campo SOLO puede tomar SI cuando la transcripción contiene una afirmación explícita de que existe una orden médica, por ejemplo: 'existe orden', 'hay una orden médica', 'se genera la orden' o equivalente. Este campo SOLO puede tomar NO cuando la transcripción afirma explícitamente que no existe una orden. La frase 'se decide hospitalización', 'se hospitaliza', 'queda hospitalizado' o cualquier decisión de hospitalizar NO significa que exista una orden. Si no se menciona una orden médica, el valor DEBE ser ''."
+      },
+
+      "trasladarPaciente": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "realizar": {
+            "type": "string",
+            "enum": [
+              "",
+              "SI",
+              "NO"
+            ],
+            "description": "Indica si el texto declara explícitamente que se realizará un traslado del paciente. Usar SI únicamente cuando se indique explícitamente que el paciente será trasladado. Usar NO únicamente cuando se indique explícitamente que no será trasladado. Si no se menciona traslado, usar ''. No interpretar la ausencia de traslado como NO."
+          },
+          "condiciones": {
+            "type": "string",
+            "description": "Condiciones necesarias para realizar el traslado."
+          },
+          "motivo": {
+            "type": "string",
+            "description": "Motivo del traslado del paciente."
+          }
+        },
+        "required": [
+          "realizar",
+          "condiciones",
+          "motivo"
+        ]
+      },
+
+      "aislamiento": {
+        "type": "string",
+        "enum": [
+          "",
+          "PRECAUCION_ESTANDAR",
+          "TRANSMISION_VIA_AEREA",
+          "PRECAUCION_GOTAS",
+          "PRECAUCION_CONTACTO",
+          "AISLAMIENTO_COHORTE",
+          "AMBIENTE_PROTEGIDO",
+          "AISLAMIENTO_VECTORES",
+          "NINGUNO"
+        ],
+        "description": "Tipo de aislamiento indicado. Aplica para Hospitalización y Urgencias Observación."
+      },
+
+      "condicionDestino": {
+        "type": "string",
+        "enum": [
+          "",
+          "NINGUNA",
+          "PACIENTE_DESTINO_DOMICILIO",
+          "PACIENTE_MUERTO",
+          "REFERIDO_OTRA_INSTITUCION",
+          "CONTRAREFERIDO_OTRA_INSTITUCION",
+          "HOSPITALIZACION_DOMICILIARIA",
+          "DERIVADO_SERVICIO_SOCIAL",
+          "PACIENTE_CONTINUA_SERVICIO"
+        ],
+        "description": "Condición y destino del paciente. Aplica para Salida y Salida Consulta Externa."
+      },
+
+      "finalizarAtencion": {
+        "type": "boolean",
+        "description": "Indica si se debe finalizar la atención."
+      },
+
+      "detalle": {
+        "type": "string",
+        "description": "Texto que describe la indicación médica concreta cuando está respaldada por la transcripción. Debe contener la conducta, tratamiento, procedimiento, estudio, hospitalización, remisión u otra acción indicada. Si existe una indicación médica explícita, copiar su contenido relevante sin inventar ni resumir información. Si no existe información para el detalle, usar ''."
+      }
+    },
+
+    "required": [
+      "tipo",
+      "causaExterna",
+      "finalidadConsulta",
+      "existeOrden",
+      "trasladarPaciente",
+      "aislamiento",
+      "condicionDestino",
+      "finalizarAtencion",
+      "detalle"
+    ]
+  }
+}

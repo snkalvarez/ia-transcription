@@ -1,0 +1,88 @@
+{
+  "name": "diagnosticos",
+  "schema": {
+    "type": "array",
+    "description": "Lista de diagnósticos mencionados o respaldados explícitamente por la transcripción. Puede contener múltiples diagnósticos. No agregar diagnósticos que no estén mencionados o respaldados por el texto.",
+    "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "codigo": {
+          "type": "string",
+          "description": "Código CIE-10 del diagnóstico únicamente si aparece explícitamente en la transcripción. No inventar, deducir ni consultar mentalmente un código CIE-10 a partir del nombre del diagnóstico. Si el código no aparece en la transcripción, usar ''."
+        },
+        "nombre": {
+          "type": "string",
+          "description": "Nombre del diagnóstico tal como aparece en la transcripción. No inventar diagnósticos ni agregar información que no esté respaldada por el texto. Si no se identifica un diagnóstico, usar ''."
+        },
+        "principal": {
+          "type": "boolean",
+          "description": "Indica si la transcripción identifica explícitamente este diagnóstico como diagnóstico principal. Usar true únicamente cuando exista una indicación explícita. Si no se menciona que sea principal, usar false."
+        },
+        "resaltar": {
+          "type": "boolean",
+          "description": "Indica si la transcripción señala explícitamente que este diagnóstico debe ser resaltado. Usar true únicamente cuando exista una indicación explícita. Si no se menciona, usar false."
+        },
+        "diagnosticoIngreso": {
+          "type": "boolean",
+          "description": "Indica si la transcripción identifica explícitamente este diagnóstico como diagnóstico de ingreso. Usar true únicamente cuando exista una indicación explícita. Si no se menciona, usar false."
+        },
+        "diagnosticoEgreso": {
+          "type": "boolean",
+          "description": "Indica si la transcripción identifica explícitamente este diagnóstico como diagnóstico de egreso. Usar true únicamente cuando exista una indicación explícita. Si no se menciona, usar false."
+        },
+        "diagnosticoComplicacion": {
+          "type": "boolean",
+          "description": "Indica si la transcripción identifica explícitamente este diagnóstico como diagnóstico de complicación. Usar true únicamente cuando exista una indicación explícita. Si no se menciona, usar false."
+        },
+        "tipo": {
+          "type": "string",
+          "enum": [
+            "",
+            "PRESUNTIVO",
+            "DEFINITIVO"
+          ],
+          "description": "Tipo del diagnóstico según la información explícita de la transcripción. PRESUNTIVO corresponde a sospecha, posibilidad o impresión aún no confirmada. DEFINITIVO corresponde a un diagnóstico expresamente confirmado. Si no puede determinarse, usar ''."
+        },
+        "clase": {
+          "type": "string",
+          "enum": [
+            "",
+            "IMPRESION_DIAGNOSTICA",
+            "CONFIRMADO_NUEVO",
+            "CONFIRMADO_REPETIDO"
+          ],
+          "description": "Clase del diagnóstico según la información explícita de la transcripción. IMPRESION_DIAGNOSTICA corresponde a una impresión o sospecha; CONFIRMADO_NUEVO a un diagnóstico confirmado como nuevo; CONFIRMADO_REPETIDO a un diagnóstico previamente confirmado que se mantiene. Si no puede determinarse, usar ''."
+        },
+        "clasificacion": {
+          "type": "string",
+          "enum": [
+            "",
+            "NO_CORRESPONDE",
+            "PREOPERATORIO",
+            "POSOPERATORIO",
+            "HISTOPATOLOGICO"
+          ],
+          "description": "Clasificación del diagnóstico. Usar PREOPERATORIO, POSOPERATORIO o HISTOPATOLOGICO únicamente cuando exista respaldo explícito en la transcripción. Si no existe información suficiente, usar ''."
+        },
+        "observacion": {
+          "type": "string",
+          "description": "Observación asociada al diagnóstico únicamente cuando esté expresamente respaldada por la transcripción. Copiar la información relevante sin inventar ni interpretar. Si no existe observación, usar ''."
+        }
+      },
+      "required": [
+        "codigo",
+        "nombre",
+        "principal",
+        "resaltar",
+        "diagnosticoIngreso",
+        "diagnosticoEgreso",
+        "diagnosticoComplicacion",
+        "tipo",
+        "clase",
+        "clasificacion",
+        "observacion"
+      ]
+    }
+  }
+}
