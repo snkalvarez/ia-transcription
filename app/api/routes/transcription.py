@@ -1,11 +1,6 @@
 from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.api.dependencies import (
-    get_groq_service,
-    get_ollama_service,
-    get_processing_repository,
-    get_transcription_service,
-)
+from app.api.dependencies import (get_groq_service,get_processing_repository,get_transcription_service)
 from app.core.database import get_db
 from app.core.logger import logger
 from app.repositories.procesamiento_ia_repository import ProcessingRepository
@@ -14,7 +9,6 @@ from app.services.ollama_service import OllamaService, OllamaServiceError
 from app.services.transcription_service import TranscriptionService
 
 router = APIRouter(tags=["transcription"])
-
 
 @router.post(
     "/transcribe",
@@ -52,13 +46,17 @@ async def get_current_active_processing(
             detail="No existe una respuesta vigente para el ingreso, tipo y día actual.",
         )
 
+    stored_resultado = processing.resultado
+    if isinstance(stored_resultado.get("resultado"), dict):
+        stored_resultado = stored_resultado["resultado"]
+
     return {
         "id": processing.id,
         "numero_ingreso": processing.numero_ingreso,
         "tipo": processing.tipo,
         "fecha": processing.fecha,
         "schema": processing.schema,
-        "resultado": processing.resultado,
+        "resultado": stored_resultado,
         "vigente": processing.vigente,
     }
 
@@ -105,19 +103,20 @@ async def transcribe_and_resultado_groq(
     print(f"Transcripción obtenida: {transcription['text']}")
     try:
         resultado = await groq_service.extract_note(transcription["text"])
+        resultado["transcription"] = transcription
     except GroqServiceError as exc:
         logger.exception("Error al solicitar la extracción clínica a Groq")
         raise HTTPException(
             status_code=502,
             detail="Groq no está disponible o devolvió una respuesta válida.",
         ) from exc
-    response_data = {"transcription": transcription, "resultado": resultado}
+    response_data = {"resultado": resultado}
     processing = await repository.save(
         db=db,
         numero_ingreso=numero_ingreso,
         tipo=tipo,
         schema="SOAP",
-        resultado=response_data,
+        resultado=resultado
     )
     response_data["vigente"] = processing.vigente
     return response_data
