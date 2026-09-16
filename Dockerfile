@@ -21,7 +21,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Copiar aplicación
-COPY app ./app
+COPY app/ .
 
 # Puerto del servicio
 EXPOSE 8080
