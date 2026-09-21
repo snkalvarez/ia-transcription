@@ -4,6 +4,7 @@ from app.api.dependencies import (get_groq_service,get_processing_repository,get
 from app.core.database import get_db
 from app.core.logger import logger
 from app.repositories.procesamiento_ia_repository import ProcessingRepository
+from app.schemas.procesamiento_request import ProcesamientoRequest
 from app.services.groq_service import GroqService, GroqServiceError
 from app.services.ollama_service import OllamaService, OllamaServiceError
 from app.services.transcription_service import TranscriptionService
@@ -100,7 +101,48 @@ async def transcribe_and_resultado_groq(
 ) -> dict[str, object]:
     """Transcribe, extrae la nota clínica con Groq y persiste el procesamiento como vigente."""
     transcription = await transcription_service.transcribe_upload(file)
-    print(f"Transcripción obtenida: {transcription['text']}")
+    return await _extract_and_save_resultado(
+        transcription=transcription,
+        numero_ingreso=numero_ingreso,
+        tipo=tipo,
+        db=db,
+        groq_service=groq_service,
+        repository=repository,
+    )
+
+
+@router.post(
+    "/procesarTranscripcionTrabajarAnalisisConIa",
+    summary="Procesar y guardar una transcripción clínica",
+    description="Recibe una transcripción de texto, extrae la información clínica con un agente IA y guarda el procesamiento asociado al ingreso indicado.",
+)
+async def process_transcription_and_resultado_groq(
+    request: ProcesamientoRequest,
+    db: AsyncSession = Depends(get_db),
+    groq_service: GroqService = Depends(get_groq_service),
+    repository: ProcessingRepository = Depends(get_processing_repository),
+) -> dict[str, object]:
+    """Extrae la nota clínica desde una transcripción y persiste el procesamiento."""
+    transcription = {"language": "", "text": request.transcripcion}
+    return await _extract_and_save_resultado(
+        transcription=transcription,
+        numero_ingreso=request.numero_ingreso,
+        tipo=request.tipo,
+        db=db,
+        groq_service=groq_service,
+        repository=repository,
+    )
+
+
+async def _extract_and_save_resultado(
+    transcription: dict[str, str],
+    numero_ingreso: str,
+    tipo: str,
+    db: AsyncSession,
+    groq_service: GroqService,
+    repository: ProcessingRepository,
+) -> dict[str, object]:
+    """Extrae una transcripción y guarda el resultado clínico como vigente."""
     try:
         resultado = await groq_service.extract_note(transcription["text"])
         resultado["transcription"] = transcription
@@ -108,7 +150,10 @@ async def transcribe_and_resultado_groq(
         logger.exception("Error al solicitar la extracción clínica a Groq")
         raise HTTPException(
             status_code=502,
-            detail="Groq no está disponible o devolvió una respuesta válida.",
+            detail={
+                "message": exc.message,
+                "groq_error": exc.groq_error,
+            },
         ) from exc
     response_data = {"resultado": resultado}
     processing = await repository.save(
@@ -116,7 +161,7 @@ async def transcribe_and_resultado_groq(
         numero_ingreso=numero_ingreso,
         tipo=tipo,
         schema="SOAP",
-        resultado=resultado
+        resultado=resultado,
     )
     response_data["vigente"] = processing.vigente
     return response_data

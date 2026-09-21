@@ -179,6 +179,24 @@ resultado clínico estructurado producido por Groq. Configure `GROQ_API_KEY` en
 `.env`; se usan por defecto `llama-3.3-70b-versatile` y 300 segundos de espera.
 Los errores de Groq o una respuesta no JSON devuelven `502`.
 
+### Procesar una transcripción y generar resultado clínico con Groq
+
+```http
+POST /procesarTranscripcionTrabajarAnalisisConIa
+Content-Type: application/json
+```
+
+Recibe directamente una transcripción, sin ejecutar Whisper, y conserva el
+mismo análisis clínico y persistencia de `/procesarAudioTrabajarAnalisisConIa`.
+
+```json
+{
+  "transcripcion": "Texto transcrito del audio.",
+  "numero_ingreso": "12345",
+  "tipo": "consulta"
+}
+```
+
 ## Estructura del proyecto
 
 ```text
