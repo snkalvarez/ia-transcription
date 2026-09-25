@@ -4,6 +4,8 @@ pydantic-settings==2.10.1
 python-multipart==0.0.32
 requests>=2.31,<3
 uvicorn[standard]
+python-socketio>=5.11,<6
+PyJWT>=2.8,<3
 groq==1.6.0
 asyncpg
 sqlalchemy

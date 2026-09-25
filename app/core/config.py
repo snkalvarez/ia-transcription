@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     LOG_LEVEL: str = "INFO"
 
     CORS_ORIGINS: list[str] = ["http://localhost:5173", "http://dgh", "http://hefesto"]
+    JWT_SECRET: str = ""
 
     # Ollama
     OLLAMA_HOST: str = "http://localhost:11434"
@@ -34,7 +35,9 @@ class Settings(BaseSettings):
 
     # Configuración de la base de datos.
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/ia_transcription_service"
-    
+
+    # Gemini
+    GEMINI_API_KEY: str = ""    
 
     @property
     def cors_origins(self) -> list[str]:
