@@ -103,7 +103,7 @@ class SoapVoiceHandler(BaseVoiceHandler):
         # ======================================================
 
         await sio.emit(
-            "soap_result",
+            "voice_result",
             extracted_soap,
             to=sid,
         )
