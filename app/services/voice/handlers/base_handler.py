@@ -25,5 +25,6 @@ class BaseVoiceHandler(ABC):
         call: dict,
         sio,
         sid: str,
+        numero_ingreso: str | None = None,
     ):
         raise NotImplementedError

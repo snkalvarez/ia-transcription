@@ -1,5 +1,7 @@
 from app.services.voice.handlers.base_handler import BaseVoiceHandler
 from app.core.logger import logger
+from app.core.database import AsyncSessionLocal
+from app.repositories.procesamiento_ia_repository import ProcessingRepository
 
 
 class FormularioHc14VoiceHandler(BaseVoiceHandler):
@@ -426,13 +428,14 @@ class FormularioHc14VoiceHandler(BaseVoiceHandler):
         HC14 finaliza automáticamente la conversación
         cuando Gemini ejecuta guardar_formulario_hc_14.
         """
-        return False
+        return True
 
     async def handle_tool_call(
         self,
         call: dict,
         sio,
         sid: str,
+        numero_ingreso: str | None = None,
     ):
         """
         Procesa las herramientas propias del flujo HC14.
@@ -443,6 +446,16 @@ class FormularioHc14VoiceHandler(BaseVoiceHandler):
 
         extracted_hc14 = call["args"]
 
+        if not numero_ingreso:
+            logger.error(
+                f"No se puede guardar el formulario HC14: "
+                f"falta el número de ingreso para {sid}"
+            )
+            return {
+                "success": False,
+                "error": "Falta el número de ingreso.",
+            }
+
         logger.info(
             f"Formulario HC14 completo extraído "
             f"exitosamente para {sid}!"
@@ -451,6 +464,16 @@ class FormularioHc14VoiceHandler(BaseVoiceHandler):
         logger.info(
             extracted_hc14
         )
+
+        repository = ProcessingRepository()
+        async with AsyncSessionLocal() as db:
+            await repository.save(
+                db=db,
+                numero_ingreso=numero_ingreso,
+                tipo=self.name,
+                schema="HC14",
+                resultado=extracted_hc14,
+            )
 
         # ======================================================
         # ENVIAR RESULTADO AL FRONTEND

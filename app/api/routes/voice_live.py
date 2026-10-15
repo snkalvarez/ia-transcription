@@ -67,6 +67,16 @@ def register_voice_events(sio):
             "voice_type",
             "soap",
         )
+        numero_ingreso = str(
+            auth.get("numero_ingreso", "")
+        ).strip()
+
+        if voice_type == "formulario_hc_14" and not numero_ingreso:
+            logger.warning(
+                "Socket.IO connection rejected: "
+                "missing admission number for HC14"
+            )
+            return False
 
         logger.info(
             f"🩺 Médico conectado vía Socket.IO "
@@ -98,6 +108,7 @@ def register_voice_events(sio):
             client_sessions[sid] = {
                 "gemini_ws": gemini_ws,
                 "handler": handler,
+                "numero_ingreso": numero_ingreso,
             }
 
             # ==================================================
@@ -248,11 +259,13 @@ async def listen_to_gemini_stream(sid,gemini_ws,handler,sio,):
                     # ==================================================
                     # DELEGAR AL HANDLER
                     # ==================================================
+                    session = client_sessions.get(sid, {})
                     result = (
                         await handler.handle_tool_call(
                             call=call,
                             sio=sio,
                             sid=sid,
+                            numero_ingreso=session.get("numero_ingreso"),
                         )
                     )
 

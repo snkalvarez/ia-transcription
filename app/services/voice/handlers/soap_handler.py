@@ -79,6 +79,7 @@ class SoapVoiceHandler(BaseVoiceHandler):
         call: dict,
         sio,
         sid: str,
+        numero_ingreso: str | None = None,
     ):
         """
         Procesa las herramientas propias del flujo SOAP.
