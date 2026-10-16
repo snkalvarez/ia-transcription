@@ -70,6 +70,9 @@ def register_voice_events(sio):
         numero_ingreso = str(
             auth.get("numero_ingreso", "")
         ).strip()
+        user_name = str(
+            auth.get("user_name", "")
+        ).strip()
 
         if voice_type == "formulario_hc_14" and not numero_ingreso:
             logger.warning(
@@ -109,6 +112,7 @@ def register_voice_events(sio):
                 "gemini_ws": gemini_ws,
                 "handler": handler,
                 "numero_ingreso": numero_ingreso,
+                "user_name": user_name,
             }
 
             # ==================================================
@@ -122,6 +126,19 @@ def register_voice_events(sio):
                     handler=handler,
                     sio=sio,
                 )
+            )
+
+            await gemini_service.enviar_texto(
+                gemini_ws,
+                (
+                    "Inicia la conversación saludando cordialmente al médico "
+                    f"por su nombre ({user_name}) y preguntándole cómo puedes "
+                    "ayudarle a diligenciar el formulario."
+                    if user_name
+                    else
+                    "Inicia la conversación saludando cordialmente al médico "
+                    "y preguntándole cómo puedes ayudarle a diligenciar el formulario."
+                ),
             )
 
         except Exception as e:

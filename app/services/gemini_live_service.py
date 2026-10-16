@@ -88,3 +88,22 @@ class GeminiLiveService:
             }
         }
         await gemini_ws.send(json.dumps(realtime_input))
+
+    async def enviar_texto(self, gemini_ws, texto: str):
+        """Envía un turno textual para iniciar una respuesta de Gemini."""
+        client_content = {
+            "clientContent": {
+                "turns": [
+                    {
+                        "role": "user",
+                        "parts": [
+                            {
+                                "text": texto
+                            }
+                        ],
+                    }
+                ],
+                "turnComplete": True,
+            }
+        }
+        await gemini_ws.send(json.dumps(client_content))
