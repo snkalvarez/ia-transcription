@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from app.services.voice.handlers.base_handler import BaseVoiceHandler
 from app.core.logger import logger
 from app.core.database import AsyncSessionLocal
@@ -15,7 +17,7 @@ class FormularioHc14VoiceHandler(BaseVoiceHandler):
             "el formulario HC14 mediante una conversación natural con el médico. "
             "Tu tarea es recopilar y registrar únicamente la información "
             "correspondiente a los campos definidos en la herramienta "
-            "guardar_formulario_hc_14. "
+            "actualizar_formulario_hc_14 y guardar_formulario_hc_14. "
             "No debes preguntar por campos que no estén incluidos en la herramienta. "
             "Adapta la conversación a los campos habilitados en cada momento. "
             "Si únicamente está habilitado el campo indicacionesMedicas, "
@@ -36,13 +38,16 @@ class FormularioHc14VoiceHandler(BaseVoiceHandler):
             "Cuando hayas recopilado la información necesaria para completar "
             "los campos habilitados, ejecuta la herramienta "
             "guardar_formulario_hc_14 con la información estructurada. "
+            "Cuando obtengas uno o más datos explícitos durante la conversación, "
+            "ejecuta actualizar_formulario_hc_14 únicamente con esos campos y "
+            "continúa la conversación. No finalices por una actualización parcial. "
             "No devuelvas únicamente un resumen en la conversación. "
             "No finalices la sesión sin ejecutar la herramienta."
         )
 
     @property
     def tools(self) -> list:
-        return [
+        declarations = [
             {
                 "functionDeclarations": [
                     {
@@ -53,104 +58,131 @@ class FormularioHc14VoiceHandler(BaseVoiceHandler):
                         "parameters": {
                             "type": "OBJECT",
                             "properties": {
-                                "subjetivo": {
-                                    "type": "STRING",
-                                    "description": (
-                                        "Síntomas narrados por el paciente."
-                                    ),
-                                },
-                                "objetivo": {
-                                    "type": "STRING",
-                                    "description": (
-                                        "Hallazgos clínicos medibles."
-                                    ),
-                                },
-                                "analisis": {
-                                    "type": "STRING",
-                                    "description": (
-                                        "Juicio clínico del médico."
-                                    ),
-                                },
-                                "plan": {
-                                    "type": "STRING",
-                                    "description": (
-                                        "Tratamiento a seguir."
-                                    ),
-                                },
-                                "infeccionIntrahospitalaria": {
-                                    "type": "BOOLEAN",
-                                    "description": (
-                                        "Indica si el paciente presenta infección intrahospitalaria. "
-                                        "Debes preguntarle al médico explícitamente si la respuesta "
-                                        "es sí o no. Registra true para sí y false para no. "
-                                        "No debes inferir la respuesta."
-                                    ),
-                                },
-                                "escalaDolor": {
+                                "historiaClinica":{
                                     "type": "OBJECT",
                                     "description": (
-                                        "Escala de dolor del paciente. Debe indicar el tipo de escala y su valor."
+                                        "Información de la historia clínica del paciente. "
+                                        "Debes recopilar únicamente los datos explícitamente mencionados por el médico. "
+                                        "No inventes ni infieras información."
                                     ),
                                     "properties": {
-                                        "tipo": {
-                                            "type": "STRING",
-                                            "description": (
-                                                "Tipo de escala de dolor "
-                                                "utilizada. Valores permitidos: "
-                                                "adulto, pediatrico, neonatal."
-                                            ),
+                                        "notaIntermedia": {
+                                            "type": "OBJECT",
+                                            "description": ("En la nota intermedia se registran el SOAP,"),
+                                            "properties": {
+                                                "subjetivo": {
+                                                    "type": "STRING",
+                                                    "description": (
+                                                        "Síntomas narrados por el paciente."
+                                                    ),
+                                                },
+                                                "objetivo": {
+                                                    "type": "STRING",
+                                                    "description": (
+                                                        "Hallazgos clínicos medibles."
+                                                    ),
+                                                },
+                                                "analisis": {
+                                                    "type": "STRING",
+                                                    "description": (
+                                                        "Juicio clínico del médico."
+                                                    ),
+                                                },
+                                                "plan": {
+                                                    "type": "STRING",
+                                                    "description": (
+                                                        "Tratamiento a seguir."
+                                                    ),
+                                                },
+                                                "infeccionIntrahospitalaria": {
+                                                    "type": "BOOLEAN",
+                                                    "description": (
+                                                        "Indica si el paciente presenta infección intrahospitalaria. "
+                                                        "Debes preguntarle al médico explícitamente si la respuesta "
+                                                        "es sí o no. Registra true para sí y false para no. "
+                                                        "No debes inferir la respuesta."
+                                                    ),
+                                                },
+                                                "escalaDolor": {
+                                                    "type": "OBJECT",
+                                                    "description": (
+                                                        "Escala de dolor del paciente. Debe indicar el tipo de escala y su valor."
+                                                    ),
+                                                    "properties": {
+                                                        "tipo": {
+                                                            "type": "STRING",
+                                                            "description": (
+                                                                "Tipo de escala de dolor "
+                                                                "utilizada. Valores permitidos: "
+                                                                "adulto, pediatrico, neonatal."
+                                                            ),
+                                                        },
+                                                        "valor": {
+                                                            "type": "STRING",
+                                                            "description": (
+                                                                "Valor de la escala de dolor. "
+                                                                "Si tipo es adulto, debe ser un número del 1 al 10. "
+                                                                "Si tipo es pediatrico, debe ser uno de: 'no duele','duele un poquito','duele un poquito más','duele aún más','duele mucho','duele muchísimo'."
+                                                                "Si tipo es neonatal, debe ser uno de: 'calmado','menos marcado intermitente','marcado constante'."
+                                                            ),
+                                                        },
+                                                    },
+                                                    "required": [
+                                                        "tipo",
+                                                        "valor",
+                                                    ],
+                                                },
+                                            },
+                                            "required": [
+                                                "subjetivo",
+                                                "objetivo",
+                                                "analisis",
+                                                "plan",
+                                                "infeccionIntrahospitalaria",
+                                                "escalaDolor"
+                                                ]
                                         },
-                                        "valor": {
-                                            "type": "STRING",
+                                        "educacionAutocuidado": {
+                                            "type": "OBJECT",
                                             "description": (
-                                                "Valor de la escala de dolor. "
-                                                "Si tipo es adulto, debe ser un número del 1 al 10. "
-                                                "Si tipo es pediatrico, debe ser uno de: 'no duele','duele un poquito','duele un poquito más','duele aún más','duele mucho','duele muchísimo'."
-                                                "Si tipo es neonatal, debe ser uno de: 'calmado','menos marcado intermitente','marcado constante'."
+                                                "Corresponde al registro de educación en autocuidado brindada por el Médico Tratante. "
+                                                "Debes preguntar explícitamente si se realizó la educación. "
+                                                "Si la respuesta es sí, solicita que explique qué educación "
+                                                "se brindó. Si la respuesta es no, registra la respuesta negativa y deja la explicación vacía. "
+                                                "No debes inferir ni inventar información."
                                             ),
-                                        },
+                                            "properties": {
+                                                "realizada": {
+                                                    "type": "BOOLEAN",
+                                                    "description": (
+                                                        "Indica si se realizó la educación en autocuidado. true para sí y false para no."
+                                                    ),
+                                                },
+                                                "explicacion": {
+                                                    "type": "STRING",
+                                                    "description": (
+                                                        "Descripción de la educación en autocuidado brindada por el Médico Tratante. Obligatoria si realizada "
+                                                        "es true. Si realizada es false, debe ser una cadena vacía."
+                                                    ),
+                                                },
+                                            },
+                                            "required": [
+                                                "realizada",
+                                                "explicacion",
+                                            ],
+                                        }
                                     },
                                     "required": [
-                                        "tipo",
-                                        "valor",
-                                    ],
-                                },
-                                "educacionAutocuidado": {
-                                    "type": "OBJECT",
-                                    "description": (
-                                        "Corresponde al registro de educación en autocuidado brindada por el Médico Tratante. "
-                                        "Debes preguntar explícitamente si se realizó la educación. "
-                                        "Si la respuesta es sí, solicita que explique qué educación "
-                                        "se brindó. Si la respuesta es no, registra la respuesta negativa y deja la explicación vacía. "
-                                        "No debes inferir ni inventar información."
-                                    ),
-                                    "properties": {
-                                        "realizada": {
-                                            "type": "BOOLEAN",
-                                            "description": (
-                                                "Indica si se realizó la educación en autocuidado. true para sí y false para no."
-                                            ),
-                                        },
-                                        "explicacion": {
-                                            "type": "STRING",
-                                            "description": (
-                                                "Descripción de la educación en autocuidado brindada por el Médico Tratante. Obligatoria si realizada "
-                                                "es true. Si realizada es false, debe ser una cadena vacía."
-                                            ),
-                                        },
-                                    },
-                                    "required": [
-                                        "realizada",
-                                        "explicacion",
-                                    ],
-                                },                                
+                                        "notaIntermedia",
+                                        "educacionAutocuidado"
+                                    ]
+                                },               
                                 "diagnosticos": {
                                     "type": "ARRAY",
                                     "description": (
-                                        "Denes preguntar si este diagnostico es principal, de ingreso, de egreso, de complicación y si debe resaltarse."
-                                        "Debes preguntar por la clase, clasificacion y observacion, si no lo menciona explícitamente,"
-                                        "para que el médico lo complete si lo desea."
-                                        "Lista de diagnósticos mencionados explícitamente por el médico. "
+                                        "Debes preguntar si este diagnostico es principal, de ingreso, de egreso, de complicación y si debe resaltarse."
+                                        "Debes preguntar por la clase, clasificacion y observacion, si no lo menciona explícitamente, para que el médico lo complete si lo desea."
+                                        "Debes listar los diagnósticos mencionados explícitamente por el médico. "
                                         "Puede contener cero, uno o varios diagnósticos. "
                                         "Registrar únicamente la información dicha, o preguntar al médico para completar los campos faltantes. "
                                         "ni deducir datos faltantes."
@@ -232,7 +264,7 @@ class FormularioHc14VoiceHandler(BaseVoiceHandler):
                                         "required":[
                                             "nombre",
                                             "tipo"
-                                        ]
+                                        ],
                                     },
                                 },
                                 "indicacionesMedicas": {
@@ -406,13 +438,7 @@ class FormularioHc14VoiceHandler(BaseVoiceHandler):
                             
                             },
                             "required": [
-                                "subjetivo",
-                                "objetivo",
-                                "analisis",
-                                "plan",
-                                "infeccionIntrahospitalaria",
-                                "escalaDolor",
-                                "educacionAutocuidado",
+                                "historiaClinica",
                                 "diagnosticos",
                                 "indicacionesMedicas"
                             ],
@@ -422,6 +448,19 @@ class FormularioHc14VoiceHandler(BaseVoiceHandler):
             }
         ]
 
+        final_declaration = declarations[0]["functionDeclarations"][0]
+        partial_declaration = deepcopy(final_declaration)
+        partial_declaration["name"] = "actualizar_formulario_hc_14"
+        partial_declaration["description"] = (
+            "Actualiza parcialmente el formulario HC14 con los datos "
+            "expresados explícitamente durante la conversación. "
+            "Incluye únicamente campos nuevos o modificados."
+        )
+        remove_required_fields(partial_declaration["parameters"])
+
+        declarations[0]["functionDeclarations"].append(partial_declaration)
+        return declarations
+
     @property
     def ends_session_after_tool_call(self) -> bool:
         """
@@ -429,6 +468,9 @@ class FormularioHc14VoiceHandler(BaseVoiceHandler):
         cuando Gemini ejecuta guardar_formulario_hc_14.
         """
         return True
+
+    def should_end_session_after_tool_call(self, tool_name: str) -> bool:
+        return tool_name == "guardar_formulario_hc_14"
 
     async def handle_tool_call(
         self,
@@ -440,6 +482,9 @@ class FormularioHc14VoiceHandler(BaseVoiceHandler):
         """
         Procesa las herramientas propias del flujo HC14.
         """
+
+        if call["name"] == "actualizar_formulario_hc_14":
+            return {"success": True}
 
         if call["name"] != "guardar_formulario_hc_14":
             return None
@@ -488,3 +533,16 @@ class FormularioHc14VoiceHandler(BaseVoiceHandler):
         return {
             "success": True
         }
+
+
+def remove_required_fields(schema: dict) -> None:
+    """Permite que la herramienta incremental reciba estructuras parciales."""
+    schema.pop("required", None)
+
+    for property_schema in schema.get("properties", {}).values():
+        if isinstance(property_schema, dict):
+            remove_required_fields(property_schema)
+
+    items_schema = schema.get("items")
+    if isinstance(items_schema, dict):
+        remove_required_fields(items_schema)

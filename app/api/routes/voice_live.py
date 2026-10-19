@@ -1,6 +1,7 @@
 import json
 import base64
 import asyncio
+from copy import deepcopy
 import jwt
 
 from app.services.gemini_live_service import GeminiLiveService
@@ -113,6 +114,7 @@ def register_voice_events(sio):
                 "handler": handler,
                 "numero_ingreso": numero_ingreso,
                 "user_name": user_name,
+                "form_draft": {},
             }
 
             # ==================================================
@@ -277,9 +279,33 @@ async def listen_to_gemini_stream(sid,gemini_ws,handler,sio,):
                     # DELEGAR AL HANDLER
                     # ==================================================
                     session = client_sessions.get(sid, {})
+                    call_for_handler = call
+
+                    if tool_name == "guardar_formulario_hc_14":
+                        final_data = merge_form_data(
+                            session.get("form_draft", {}),
+                            call.get("args") or {},
+                        )
+                        session["form_draft"] = final_data
+                        call_for_handler = {
+                            **call,
+                            "args": final_data,
+                        }
+
+                    if tool_name == "actualizar_formulario_hc_14":
+                        session["form_draft"] = merge_form_data(
+                            session.get("form_draft", {}),
+                            call.get("args") or {},
+                        )
+                        await sio.emit(
+                            "voice_form_update",
+                            session["form_draft"],
+                            to=sid,
+                        )
+
                     result = (
                         await handler.handle_tool_call(
-                            call=call,
+                            call=call_for_handler,
                             sio=sio,
                             sid=sid,
                             numero_ingreso=session.get("numero_ingreso"),
@@ -319,7 +345,7 @@ async def listen_to_gemini_stream(sid,gemini_ws,handler,sio,):
                         )
                     )
 
-                    if handler.ends_session_after_tool_call:
+                    if handler.should_end_session_after_tool_call(tool_name):
                         logger.info(
                             f"🏁 Flujo '{handler.name}' completado "
                             f"para la sesión {sid}"
@@ -332,7 +358,6 @@ async def listen_to_gemini_stream(sid,gemini_ws,handler,sio,):
                                 f"Error cerrando WebSocket de Gemini "
                                 f"para {sid}: {str(e)}"
                             )
-
                         return
 
     except Exception as e:
@@ -364,3 +389,19 @@ async def listen_to_gemini_stream(sid,gemini_ws,handler,sio,):
                         f"Error cerrando WebSocket de Gemini "
                         f"en cleanup para {sid}: {str(e)}"
                     )
+
+
+def merge_form_data(current: dict, update: dict) -> dict:
+    """Combina actualizaciones parciales sin perder objetos anidados."""
+    merged = deepcopy(current)
+
+    for key, value in update.items():
+        if (
+            isinstance(value, dict)
+            and isinstance(merged.get(key), dict)
+        ):
+            merged[key] = merge_form_data(merged[key], value)
+        else:
+            merged[key] = deepcopy(value)
+
+    return merged
