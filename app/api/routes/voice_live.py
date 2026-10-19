@@ -353,16 +353,14 @@ async def listen_to_gemini_stream(sid,gemini_ws,handler,sio,):
             None,
         )
 
-        if not session:
-            return
+        if session is not None:
+            ws = session["gemini_ws"]
 
-        ws = session["gemini_ws"]
-
-        if ws:
-            try:
-                await ws.close()
-            except Exception as e:
-                logger.warning(
-                    f"Error cerrando WebSocket de Gemini "
-                    f"en cleanup para {sid}: {str(e)}"
-                )
+            if ws:
+                try:
+                    await ws.close()
+                except Exception as e:
+                    logger.warning(
+                        f"Error cerrando WebSocket de Gemini "
+                        f"en cleanup para {sid}: {str(e)}"
+                    )
